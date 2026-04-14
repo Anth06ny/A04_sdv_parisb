@@ -68,9 +68,17 @@ object KtorWeatherApi {
             throw Exception("Erreur API: ${response.status} - ${response.bodyAsText()}")
         }
 
-        return response.body<WeatherAPIResponseDTO>().list
-        //possibilité de typer le body
-        //.body<List<MuseumDTO>>()
+        val list =  response.body<WeatherAPIResponseDTO>().list
+        //traintement, on remplace le nom de l'image par l'url complète
+        //
+        list.forEach {//it : WeatherEntity->
+            it.weather.forEach { //it : DescriptionEntity->
+                it.icon = "https://openweathermap.org/img/wn/${it.icon}@4x.png"
+            }
+        }
+
+
+        return list
     }
 
     //Ferme le Client mais celui ci ne sera plus utilisable. Uniquement pour le main
@@ -98,7 +106,7 @@ data class WeatherEntity(
 @Serializable
 data class DescriptionEntity(
     val description: String,
-    val icon: String
+    var icon: String
 )
 
 
@@ -109,5 +117,6 @@ data class TempEntity(
 
 @Serializable
 data class WindEntity(
-    val speed: Double
+    var speed: Double
 )
+
