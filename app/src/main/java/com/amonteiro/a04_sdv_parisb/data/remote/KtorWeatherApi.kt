@@ -16,22 +16,24 @@ import kotlinx.serialization.json.Json
 
 //Suspend sera expliqué dans le chapitre des coroutines
 suspend fun main() {
-    val user = KtorUserApi.loadUser()
+    val list = KtorWeatherApi.loadWeathers("Nice")
 
-    println("""
-        Il s'appelle ${user.name} pour le contacter :
-        Phone : ${user.coord?.phone ?: "-"}
-        Mail : ${user.coord?.mail?: "-"}
-    """.trimIndent())
+    for (w in list) {
+        println("""
+            Il fait ${w.main.temp}° à ${w.name} (id=${w.id}) avec un vent de ${w.wind.speed} m/s
+            -Description : ${w.weather.getOrNull(0)?.description ?: "-"}
+            -Icône : ${w.weather.getOrNull(0)?.icon ?: "-"}
+        """.trimIndent())
+    }
 
 
 
-    KtorUserApi.close()
+    KtorWeatherApi.close()
 }
 
-object KtorUserApi {
+object KtorWeatherApi {
     private const val API_URL =
-        "https://www.amonteiro.fr/api/randomuser"
+        "https://api.openweathermap.org/data/2.5/find?appid=b80967f0a6bd10d23e44848547b26550&units=metric&lang=fr&q="
 
     //Création et réglage du client
     private val client  = HttpClient {
@@ -55,8 +57,8 @@ object KtorUserApi {
 
     //GET Le JSON reçu sera parser en UserDTO
     //Crash si le JSON ne correspond pas
-    suspend fun loadUser(): UserDTO {
-        val response = client.get(API_URL){
+    suspend fun loadWeathers(cityname:String): List<WeatherEntity> {
+        val response = client.get(API_URL  + cityname){
 //            headers {
 //                append("Authorization", "Bearer YOUR_TOKEN")
 //                append("Custom-Header", "CustomValue")
@@ -66,23 +68,7 @@ object KtorUserApi {
             throw Exception("Erreur API: ${response.status} - ${response.bodyAsText()}")
         }
 
-        return response.body()
-        //possibilité de typer le body
-        //.body<List<MuseumDTO>>()
-    }
-
-    suspend fun loadUsers(): List<UserDTO> {
-        val response = client.get(API_URL + "s"){
-//            headers {
-//                append("Authorization", "Bearer YOUR_TOKEN")
-//                append("Custom-Header", "CustomValue")
-//            }
-        }
-        if (!response.status.isSuccess()) {
-            throw Exception("Erreur API: ${response.status} - ${response.bodyAsText()}")
-        }
-
-        return response.body()
+        return response.body<WeatherAPIResponseDTO>().list
         //possibilité de typer le body
         //.body<List<MuseumDTO>>()
     }
@@ -96,14 +82,32 @@ object KtorUserApi {
 
 //Possible qu'il y ait besoin de cette annotation en fonction du compilateur
 @Serializable //KotlinX impose cette annotation
-data class UserDTO(
-    val age: Int,
-    val name: String,
-    val coord: CoordDTO? = null,
+data class WeatherAPIResponseDTO(
+    val list: List<WeatherEntity>,
 )
 
 @Serializable //KotlinX impose cette annotation
-data class CoordDTO(
-    val phone: String? = null,
-    val mail: String? = null,
+data class WeatherEntity(
+    val id: Long,
+    val name: String,
+    val main : TempEntity,
+    val wind : WindEntity,
+    val weather : List<DescriptionEntity>
+)
+
+@Serializable
+data class DescriptionEntity(
+    val description: String,
+    val icon: String
+)
+
+
+@Serializable
+data class TempEntity(
+    val temp: Double
+)
+
+@Serializable
+data class WindEntity(
+    val speed: Double
 )
