@@ -1,4 +1,4 @@
-package com.amonteiro.a04_sdv_parisb.ui.theme
+package com.amonteiro.a04_sdv_parisb.presentation.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
