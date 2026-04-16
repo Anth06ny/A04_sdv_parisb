@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">A04_sdv_parisb</string>
+    <string name="bt_clear">Clear</string>
+    <string name="load">Load</string>
 </resources>
