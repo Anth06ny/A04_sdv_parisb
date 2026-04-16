@@ -150,7 +150,13 @@ data class WeatherEntity(
     val main: TempEntity,
     val wind: WindEntity,
     val weather: List<DescriptionEntity>
-)
+) {
+    fun getResume() = """
+        Il fait ${main.temp}° à ${name} (id=${id}) avec un vent de ${wind.speed} m/s
+            -Description : ${weather.getOrNull(0)?.description ?: "-"}
+            -Icône : ${weather.getOrNull(0)?.icon ?: "-"}
+        """.trimIndent()
+}
 
 @Serializable
 data class DescriptionEntity(
