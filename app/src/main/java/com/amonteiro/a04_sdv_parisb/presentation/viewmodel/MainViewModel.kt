@@ -38,7 +38,7 @@ class MainViewModel : ViewModel() {
 
     init {//Création d'un jeu de donnée au démarrage
         println("Instanciation de MainViewModel")
-        loadFakeData()
+        //loadFakeData()
     }
 
     fun loadWeathers(cityName: String) {
